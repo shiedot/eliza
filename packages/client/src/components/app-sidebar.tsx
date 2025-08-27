@@ -39,6 +39,7 @@ import { useDeleteChannel } from '@/hooks/use-query-hooks';
 import clientLogger from '@/lib/logger'; // Added import
 import { useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { Book, Cog, Plus, TerminalIcon, Trash2, Users } from 'lucide-react'; // Added Hash for channels
+import { FirecrawlButton } from './firecrawl-button';
 import { useMemo, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'; // Added useNavigate
 import {
@@ -647,6 +648,11 @@ export function AppSidebar({
             <FooterLink to="/settings" Icon={Cog} label="Settings" />
             <ConnectionStatus />
           </SidebarMenu>
+          
+          {/* Firecrawl Button */}
+          <div className="px-2 py-2">
+            <FirecrawlButton />
+          </div>
         </SidebarFooter>
       </Sidebar>
 
