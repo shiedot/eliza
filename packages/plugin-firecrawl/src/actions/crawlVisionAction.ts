@@ -52,7 +52,7 @@ export const crawlVisionAction: Action = {
 
         try {
             elizaLogger.info("Starting Vision.io crawl...");
-
+            
             // Test the API connection first
             const testResponse = await testFirecrawlConnection(config.FIRECRAWL_API_KEY);
             if (!testResponse.success) {
@@ -102,7 +102,7 @@ export const crawlVisionAction: Action = {
             for (const marketplace of marketplaces) {
                 try {
                     elizaLogger.info(`Trying ${marketplace.name}...`);
-
+                    
                     const response = await fetch('https://api.firecrawl.dev/v0/scrape', {
                         method: 'POST',
                         headers: {
@@ -152,8 +152,18 @@ export const crawlVisionAction: Action = {
                         continue;
                     }
 
-                    const data = await response.json();
-
+                    // Handle the JSON parsing error specifically
+                    let data;
+                    try {
+                        const responseText = await response.text();
+                        data = JSON.parse(responseText);
+                    } catch (parseError: any) {
+                        lastError = `${marketplace.name} returned invalid JSON: ${parseError.message}`;
+                        elizaLogger.error(`JSON parsing error for ${marketplace.name}: ${parseError.message}`);
+                        elizaLogger.error(`Response preview: ${responseText?.substring(0, 200)}`);
+                        continue;
+                    }
+                    
                     if (data.success && data.data?.listings && data.data.listings.length > 0) {
                         elizaLogger.info(`✅ Successfully crawled ${marketplace.name} with ${data.data.listings.length} listings`);
                         successfulData = { ...data, marketplace: marketplace.name };
@@ -168,16 +178,19 @@ export const crawlVisionAction: Action = {
             }
 
             if (!successfulData) {
+                // Provide a helpful response with alternative approaches
                 callback({
-                    text: `❌ Unable to crawl ENS marketplaces at this time. This could be due to:
-• Vision.io having anti-bot protection
-• Marketplaces using dynamic content that requires JavaScript
-• Selectors needing to be updated for current site layouts
+                    text: `❌ Unable to crawl ENS marketplaces at this time. 
 
-Alternative approaches:
-• Use ENS APIs directly (ens.domains API)
-• Monitor ENS events on-chain
-• Use specialized ENS data providers
+**Issue**: Vision.io and other marketplaces are either blocked by Firecrawl or return HTML instead of JSON data.
+
+**Alternative Solutions**:
+1. **Use ENS APIs directly**: Access ens.domains API for real-time data
+2. **Monitor on-chain events**: Track ENS registration and transfer events
+3. **Use specialized providers**: Services like ENS Vision API or similar
+4. **Manual monitoring**: Set up alerts for specific domains
+
+**Technical Details**: The error "Unexpected token 'T', 'The page c'... is not valid JSON" indicates that Firecrawl is receiving HTML error pages instead of the expected JSON response, likely due to anti-bot protection.
 
 Last error: ${lastError}`,
                 });
@@ -190,7 +203,7 @@ Last error: ${lastError}`,
 
             // Process and save listings to database
             const processedListings = await processListings(listings, runtime);
-
+            
             callback({
                 text: `✅ Successfully crawled ${data.marketplace} and found ${listings.length} domain listings. ${processedListings.length} were successfully processed and saved to the database.`,
                 content: {
@@ -200,7 +213,7 @@ Last error: ${lastError}`,
                     sampleListings: processedListings.slice(0, 3)
                 }
             });
-
+            
             return true;
 
         } catch (error: any) {
@@ -247,9 +260,9 @@ async function testFirecrawlConnection(apiKey: string): Promise<{ success: boole
 
         if (!response.ok) {
             const errorText = await response.text();
-            return {
-                success: false,
-                error: `API connection test failed: ${response.status} ${response.statusText}. Response: ${errorText.substring(0, 200)}`
+            return { 
+                success: false, 
+                error: `API connection test failed: ${response.status} ${response.statusText}. Response: ${errorText.substring(0, 200)}` 
             };
         }
 
@@ -266,7 +279,7 @@ async function testFirecrawlConnection(apiKey: string): Promise<{ success: boole
 
 async function processListings(listings: VisionListing[], runtime: IAgentRuntime): Promise<any[]> {
     const processedListings = [];
-
+    
     for (const listing of listings) {
         try {
             // Parse price - handle various formats like "1.5 ETH", "1500 USD", etc.
@@ -279,6 +292,9 @@ async function processListings(listings: VisionListing[], runtime: IAgentRuntime
 
             const isBelowFloor = floorPrice ? price < floorPrice : false;
 
+            // Parse listed date
+            const listedAt = listing.listedAt ? new Date(listing.listedAt) : new Date();
+
             // For now, just log the processed listing
             // In a real implementation, you'd save to your database here
             const processedListing = {
@@ -287,7 +303,10 @@ async function processListings(listings: VisionListing[], runtime: IAgentRuntime
                 floorPrice,
                 isBelowFloor,
                 listedAt: listing.listedAt || new Date().toISOString(),
-                metadata: listing.metadata || {}
+                metadata: {
+                    ...listing.metadata,
+                    scrapedAt: new Date().toISOString()
+                }
             };
 
             processedListings.push(processedListing);
