@@ -1,12 +1,12 @@
 {
-  "buildCommand": "bun install && cd packages/client && bun run build",
-  "outputDirectory": "packages/client/dist",
-  "installCommand": "bun install",
-  "framework": "vite",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
+    "buildCommand": "bun install --ignore-scripts && cd packages/client && bun run build",
+    "outputDirectory": "packages/client/dist",
+    "installCommand": "bun install --ignore-scripts",
+    "framework": "vite",
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ]
 }
