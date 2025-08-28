@@ -1,7 +1,7 @@
 {
-  "buildCommand": "cd packages/client && npm run build",
+  "buildCommand": "bun install && cd packages/client && bun run build",
   "outputDirectory": "packages/client/dist",
-  "installCommand": "npm install",
+  "installCommand": "bun install",
   "framework": "vite",
   "rewrites": [
     {
