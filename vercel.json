@@ -1,5 +1,5 @@
 {
-    "buildCommand": "bun install --ignore-scripts && cd packages/client && bun run build",
+    "buildCommand": "bun install --ignore-scripts && bun run build:client",
     "outputDirectory": "packages/client/dist",
     "installCommand": "bun install --ignore-scripts",
     "framework": "vite",
