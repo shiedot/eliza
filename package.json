@@ -7,7 +7,7 @@
     "node": "22.x"
   },
   "scripts": {
-    "postinstall": "bash ./scripts/init-submodules.sh",
+    "postinstall": "echo 'Skipping submodule initialization for Vercel deployment'",
     "start": "turbo run start --filter=./packages/cli --log-prefix=none",
     "start:debug": "cross-env NODE_NO_WARNINGS=1 LOG_LEVEL=debug elizaos start",
     "start:app": "turbo run start --filter=./packages/app",
