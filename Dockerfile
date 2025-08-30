@@ -1,31 +1,3 @@
-FROM node:20-slim AS builder
-
-WORKDIR /app
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    build-essential \
-    curl \
-    git \
-    python3 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN npm install -g bun@1.2.5
-
-COPY package.json turbo.json tsconfig.json lerna.json .npmrc ./
-COPY scripts ./scripts
-
-# Install dependencies first
-RUN SKIP_POSTINSTALL=1 bun install --no-cache
-
-# Copy packages after deps to leverage Docker layer caching
-COPY packages ./packages
-
-# Build only essential packages to reduce memory usage
-RUN NODE_OPTIONS="--max-old-space-size=1024" bun run build:core
-RUN NODE_OPTIONS="--max-old-space-size=1024" bun run build:cli
-
 FROM node:20-slim
 
 WORKDIR /app
@@ -40,14 +12,14 @@ RUN apt-get update && \
 
 RUN npm install -g bun@1.2.5
 
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/turbo.json ./
-COPY --from=builder /app/tsconfig.json ./
-COPY --from=builder /app/lerna.json ./
-COPY --from=builder /app/renovate.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/scripts ./scripts
+COPY package.json turbo.json tsconfig.json lerna.json .npmrc ./
+COPY scripts ./scripts
+COPY packages ./packages
+
+# Install dependencies and build in one step
+RUN SKIP_POSTINSTALL=1 bun install --no-cache && \
+    NODE_OPTIONS="--max-old-space-size=512" bun run build:core && \
+    NODE_OPTIONS="--max-old-space-size=512" bun run build:cli
 
 ENV NODE_ENV=production
 
