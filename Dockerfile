@@ -12,14 +12,13 @@ RUN apt-get update && \
 
 RUN npm install -g bun@1.2.5
 
-COPY package.json turbo.json tsconfig.json lerna.json .npmrc ./
+COPY package.json turbo.json tsconfig.json lerna.json .npmrc build-utils.ts ./
 COPY scripts ./scripts
 COPY packages ./packages
 
 # Install dependencies and build in one step
 RUN SKIP_POSTINSTALL=1 bun install --no-cache && \
-    NODE_OPTIONS="--max-old-space-size=512" bun run build:core && \
-    NODE_OPTIONS="--max-old-space-size=512" bun run build:cli
+    NODE_OPTIONS="--max-old-space-size=2048" bun run build
 
 ENV NODE_ENV=production
 
