@@ -1,0 +1,14 @@
+[phases.setup]
+nixPkgs = ['nodejs_20', 'python3', 'git']
+
+[phases.install]
+cmds = [
+  'npm install -g bun@1.2.5',
+  'SKIP_POSTINSTALL=1 bun install --no-cache'
+]
+
+[phases.build]
+cmds = ['bun run build']
+
+[start]
+cmd = 'bun start'
