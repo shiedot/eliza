@@ -8,7 +8,7 @@
   },
   "scripts": {
     "postinstall": "bash ./scripts/init-submodules.sh",
-    "start": "turbo run start --filter=./packages/cli --log-prefix=none --no-cache",
+    "start": "bun run standalone.ts",
     "start:debug": "cross-env NODE_NO_WARNINGS=1 LOG_LEVEL=debug elizaos start",
     "start:app": "turbo run start --filter=./packages/app",
     "dev": "bun run scripts/dev-watch.js",
@@ -78,6 +78,7 @@
     "@elizaos/plugin-e2b": "1.2.0",
     "@elizaos/plugin-openai": "^1.0.9",
     "@elizaos/plugin-twitter": "git+https://github.com/elizaos-plugins/plugin-twitter.git#1.x",
+    "@vercel/node": "^5.3.17",
     "dotenv": "^17.2.1",
     "helmet": "^8.1.0",
     "js-yaml": "^4.1.0",
