@@ -77,6 +77,8 @@
     "@elizaos/plugin-coinbase": "^1.0.2",
     "@elizaos/plugin-e2b": "1.2.0",
     "@elizaos/plugin-openai": "^1.0.9",
+    "@elizaos/plugin-twitter": "git+https://github.com/elizaos-plugins/plugin-twitter.git#1.x",
+    "dotenv": "^17.2.1",
     "helmet": "^8.1.0",
     "js-yaml": "^4.1.0",
     "zod": "3.24.2"
