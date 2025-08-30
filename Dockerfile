@@ -22,8 +22,9 @@ RUN SKIP_POSTINSTALL=1 bun install --no-cache
 # Copy packages after deps to leverage Docker layer caching
 COPY packages ./packages
 
-# Build with memory optimization
-RUN NODE_OPTIONS="--max-old-space-size=2048" bun run build
+# Build only essential packages to reduce memory usage
+RUN NODE_OPTIONS="--max-old-space-size=1024" bun run build:core
+RUN NODE_OPTIONS="--max-old-space-size=1024" bun run build:cli
 
 FROM node:20-slim
 
